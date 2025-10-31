@@ -20,6 +20,7 @@ class Products(db.Model):
     categories = db.relationship("Categories", secondary=products_categories_association_table, back_populates='products')
     warranty = db.relationship("Warranties", foreign_keys='[Warranties.product_id]', back_populates='product', uselist=False, cascade='all')
 
+# The constructor
     def __init__(self, product_name, description, price, company_id, active=True):
         self.product_name = product_name
         self.description = description
@@ -27,14 +28,24 @@ class Products(db.Model):
         self.company_id = company_id
         self.active = active
 
+    def new_product_obj():
+        return Products('', '', 0, '', True)
+
 
 class ProductsSchema(ma.Schema):
     
     class Meta:
-        fields = ['product_id', 'product_name', 'description', 'price', 'company', 'active']
+        fields = ['product_id', 'product_name', 'description', 'price', 'company', 'active', 'categories', 'warranty']
 
-    company = ma.fields.Nested("CompaniesSchema", exclude=['products'])    
+    product_id = ma.fields.UUID()
+    product_name = ma.fields.String(required=True)
+    description = ma.fields.String(allow_none=True)
+    price = ma.fields.Float(allow_none=True)
+    active = ma.fields.Boolean(allow_none=True, dump_default=True)
+
+    company = ma.fields.Nested("CompaniesSchema")    
     categories = ma.fields.Nested("CategoriesSchema", many=True, exclude=['products'])
     warranty = ma.fields.Nested("WarrantiesSchema", exclude=['product'])
+    
 product_schema = ProductsSchema()
 products_schema = ProductsSchema(many=True)
